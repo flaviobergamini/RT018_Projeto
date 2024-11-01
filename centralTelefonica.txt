@@ -1,0 +1,89 @@
+-- Empresa: INATEL
+-- Título: MIB central telefônica
+-- Conteúdo: Projeto de script MIB para uma central telefônica da disciplina RT018 da pós-graduação
+-- Versão: 1.00 Rev:0
+-- Data: 31/10/2024
+-- Autor: Flávio Henrique Madureira Bergamini
+-- História: 
+
+INATEL-SMI DEFINITIONS ::= BEGIN
+
+IMPORTS
+    enterprises
+            FROM RFC1155-SMI
+    OBJECT-TYPE
+            FROM RFC-1212
+    TRAP-TYPE
+            FROM RFC-1215
+
+-- Objetos: Declaração dos objetos usados no script
+inatel                      OBJECT IDENTIFIER ::= { enterprises 17070 }
+inatelMarketing             OBJECT IDENTIFIER ::= { inatel 1 }             -- Uma das centrais que o Inatel pode possuir
+centralTelefonica           OBJECT IDENTIFIER ::= { inatelMarketing 1 }
+centralTelefonicaStatus     OBJECT IDENTIFIER ::= { centralTelefonica 1 }
+centralTelefonicaConfig     OBJECT IDENTIFIER ::= { centralTelefonica 2 }
+centralTelefonicaTrap       OBJECT IDENTIFIER ::= { centralTelefonica 3 }
+
+
+-- Estado: Tensão de Entrada (somente de leitura)
+tensaoEntrada        OBJECT-TYPE
+    SYNTAX           INTEGER (127..220)
+    ACCESS           read-only
+    STATUS           mandatory
+    DESCRIPTION
+        "Tensão de entrada da central telefônica (127V a 220V)."
+    ::= { centralTelefonicaStatus 1 }
+
+-- Estado: Tensão de Saída (leitura e configuração)
+tensaoSaida          OBJECT-TYPE
+    SYNTAX           INTEGER (-48..48)
+    ACCESS           read-write
+    STATUS           mandatory
+    DESCRIPTION
+        "Tensão de saída da central telefônica (-48V a +48V)."
+    ::= { centralTelefonicaConfig 1 }
+
+-- Estado: Tempo de Carregamento da Base de Dados
+tempoCarregamento    OBJECT-TYPE
+    SYNTAX           INTEGER (0..5)
+    MAX-ACCESS       read-write
+    STATUS           mandatory
+    DESCRIPTION
+        "Tempo de carregamento da base de dados (0 a 5 minutos) quando há perda de informações no processador da central."
+    ::= { centralTelefonicaConfig 2 }
+
+-- Variável: Sinalização de Queda de Energia
+quedaEnergia         OBJECT-TYPE
+    SYNTAX           INTEGER { normal(0), queda(1) }
+    MAX-ACCESS       read-only
+    STATUS           mandatory
+    DESCRIPTION
+        "Variável que indica se houve queda de energia na central telefônica."
+    ::= { centralTelefonicaTrap 1 }
+
+-- Variável: Sinalização de Atuação do Banco de Bateria
+atuacaoBateria       OBJECT-TYPE
+    SYNTAX           INTEGER { normal(0), atuacao(1) }
+    MAX-ACCESS       read-only
+    STATUS           mandatory
+    DESCRIPTION
+        "Variável que indica se o banco de bateria está em uso devido à queda de energia."
+    ::= { centralTelefonicaTrap 2 }
+
+-- Trap: Sinalização de Queda de Energia
+quedaEnergiaTrap     TRAP-TYPE
+    ENTERPRISE       centralTelefonicaTrap
+    VARIABLES        {quedaEnergia}
+    DESCRIPTION
+        "Trap gerado quando ocorre queda de energia."
+    ::= 1
+
+-- Trap: Sinalização de Atuação do Banco de Bateria
+atuacaoBateriaTrap   TRAP-TYPE
+    ENTERPRISE       centralTelefonicaTrap
+    VARIABLES        {atuacaoBateria}
+    DESCRIPTION
+        "Trap gerado quando o banco de bateria entra em funcionamento devido à queda de energia."
+    ::= 2
+
+END
