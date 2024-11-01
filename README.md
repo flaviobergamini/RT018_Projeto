@@ -23,4 +23,4 @@
 * **Flávio Henrique Madureira Bergamini** - [Flávio](https://github.com/flaviobergamini)
 
 Sob a orientação do professor:
-* **Pedro Julio Matuck** - 
+**Rinaldo Duarte Teixeira de Carvalho** 
